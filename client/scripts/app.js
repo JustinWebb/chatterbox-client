@@ -11,16 +11,33 @@ var app = (function(){
 
       server: 'https://api.parse.com/1/classes/chatterbox',
 
-      clearMessages:function(){
-        _vm.chats.children().remove();
-      },
-
       init:function(){
 
         console.log();
         _vm.chats = $('#chats');
         _vm.messages = $('#messages');
       },
+
+      clearMessages:function(){
+        _vm.chats.children().remove();
+      },
+
+      addMessage : function (msg) {
+      // var message = {
+      //   username: 'Mel Brooks',
+      //   text: 'Never underestimate the power of the Schwartz!',
+      //   roomname: 'lobby'
+      // };
+      var item =  '<li class="chat">' +
+                    '<p>'+
+                      '<span class="userName">' + msg.username + '</span>' +
+                      '<span>' + msg.roomname + '</span>' +
+                      '<span>' + msg.text + '</span>' +
+                    '</p>' +
+                  '</li>';
+        _vm.chats.append(item);
+      },
+
       send:function(input){
         $.ajax({
           // always use this url
