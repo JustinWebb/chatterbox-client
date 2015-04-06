@@ -1,16 +1,25 @@
 
 var app = (function(){
   // Private variables
-
-
+  var _vm = {
+    chats: null,
+    messages: null
+  };
   // Public API
   return {
       results:[],
 
       server: 'https://api.parse.com/1/classes/chatterbox',
 
+      clearMessages:function(){
+        _vm.chats.children().remove();
+      },
+
       init:function(){
 
+        console.log();
+        _vm.chats = $('#chats');
+        _vm.messages = $('#messages');
       },
       send:function(input){
         $.ajax({
@@ -47,10 +56,10 @@ var app = (function(){
           success: function (data) {
             //console.error('chatterbox: Failed to send message');
             // ourData
-            var $messages = $('#messages');
+
             _.each(data.results, function(item){
-              $messages.children('li').remove();
-              $messages.append('<li class="chat">' +
+              _vm.messages.children('li').remove();
+              _vm.messages.append('<li class="chat">' +
                                       '<p class="userName">' + item.username + ' ' + item.roomname + '</p>'
                                       + '<p>' + item.text + '</p>'
 
