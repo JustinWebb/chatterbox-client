@@ -4,7 +4,9 @@
       var _vm = {
         chats: null,
         messages: null,
-        currentRoom: null
+        currentRoom: null,
+        rooms: null,
+        submit: null
       };
       // Public API
       return {
@@ -16,6 +18,8 @@
             _vm.chats = $('#chats');
             _vm.chats.on('click', '.username', this.addFriend);
             _vm.rooms = $('#roomSelect');
+            _vm.submit = $('#send .submit');
+            _vm.submit.on('submit', this.handleSubmit);
             // $('ul .chat .username').on('click', this.addFriend);
           },
 
@@ -44,6 +48,10 @@
                           // '</p>' +
                         '</li>';
               _vm.rooms.append(item);
+          },
+
+          handleSubmit: function(e){
+            console.log(e);
           },
 
           send:function(input){
