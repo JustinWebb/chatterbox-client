@@ -7,8 +7,8 @@
         $rooms: null,
         $submit: null,
         currentUser: null,
-        currentRoom: "homeroom",
-        listLimit: 10,
+        currentRoom: null,
+        listLimit: 100,
         chatRooms: {},
         results:{}
       };
@@ -25,10 +25,12 @@
 
             _vm.$chats.on('click', '.username', this.addFriend);
             _vm.$form.on('submit', this.handleSubmit.bind(this));
+            _vm.$rooms.on('click', 'a', this.changeRoom.bind(this));
 
             _vm.currentUser = (prompt('What is your name?') || 'anonymous');
             //window.location.search += '&username=' + _vm.currentUser;
 
+            // this.buildChatRooms.bind(this);
             this.fetch();
           },
 
@@ -59,6 +61,12 @@
               _vm.$rooms.append(item);
           },
 
+          changeRoom: function(e){
+
+            _vm.currentRoom = e.target.id;
+            this.buildChatRoom();
+          },
+
           handleSubmit: function(e){
             e.preventDefault();
             console.log(e);
@@ -69,6 +77,7 @@
               'roomname': _vm.currentRoom
             };
             this.send(message);
+
           },
 
           send:function(input){
@@ -86,10 +95,36 @@
                 console.error('chatterbox: Failed to send message');
               }
             });
+            this.fetch();
+          },
+
+          buildChatRoom:function(){
+            var liHtml = "";
+            _vm.$chats.children('li').remove();
+            if(!_vm.currentRoom){
+              _.each(_vm.chatRooms, function(room){
+                _.each(room, function(item, i, list){
+                liHtml = '<li class="chat">' +
+                            '<p class="userName">' + item.username + ' ' + item.roomname + '</p>' +
+                            '<p>' + item.text + '</p>' +
+                          '</li>';
+                _vm.$chats.append(liHtml);
+                });
+              });
+            }else{
+              _.each(_vm.chatRooms[_vm.currentRoom], function(item, i, list){
+                liHtml = '<li class="chat">' +
+                            '<p class="userName">' + item.username + ' ' + item.roomname + '</p>' +
+                            '<p>' + item.text + '</p>' +
+                          '</li>';
+                //_vm.$chats.children('li').remove();
+                _vm.$chats.append(liHtml);
+              });
+            }
           },
 
           fetch: function(){
-
+            var chatBuilder = this.buildChatRoom;
             $.ajax({
               // always use this url
               url: this.server,
@@ -105,33 +140,41 @@
               contentType: 'application/json',
               //dataType:'jsonp',
               success: function (data) {
-                //console.error('chatterbox: Failed to send message')
                 var liHtml = "";
                 _.each(data.results, function(item, i, list){
+                  // build chatRooms obj
                   item.text = _.escape(item.text);
+                  item.roomname = _.escape(item.roomname);
                   if (!_vm.chatRooms[item.roomname]) {
                     var key = item.objectId;
                     _vm.chatRooms[item.roomname] = {key : item};
                   }
                   else if (!_vm.chatRooms[item.roomname][item.objectId]) {
                       _vm.chatRooms[item.roomname][item.objectId] = item;
-                      console.log(_vm.chatRooms, i);
+                      //console.log(_vm.chatRooms, i);
                   }
-
-                  liHtml = '<li class="chat">' +
-                              '<p class="userName">' + item.username + ' ' + item.roomname + '</p>' +
-                              '<p>' + item.text + '</p>' +
-                            '</li>';
-                  //_vm.$chats.children('li').remove();
-                  _vm.$chats.append(liHtml);
                 });
                 // populate the list of rooms available
                 // use add room function.
+                var liRooms = "";
+                var rooms = Object.keys(_vm.chatRooms);
+
+                _.each(rooms, function(ele, index, list){
+                  liRooms = '<li>' +
+                              '<a href="#" id="'+ ele +'">' + ele + '</a>' +
+                            '</li>';
+                  //_vm.$chats.children('li').remove();
+                  _vm.$rooms.append(liRooms);
+                });
+                // separated the fetch method that populates our chat room hash from the build chat room messages feature.
+                chatBuilder();
               },
               error: function (data) {
                 console.error('chatterbox: Failed to send message');
               }
             });
+            // this.buildChatRoom.bind(this);
+
           }
 
         };
