@@ -92,12 +92,8 @@
               contentType: 'application/json',
               //dataType:'jsonp',
               success: function (data) {
-                //console.error('chatterbox: Failed to send message');
-                // ourData
-                _vm.results
-                data.results
-
-                var chatHtml = "";
+                //console.error('chatterbox: Failed to send message')
+                var liHtml = "";
                 _.each(data.results, function(item, i, list){
                   if (!_vm.chatRooms[item.roomname]) {
                     var key = item.objectId;
@@ -108,13 +104,12 @@
                       console.log(_vm.chatRooms, i);
                   }
 
-                  chatHtml = '<li class="chat">' +
-                              '<p class="userName">' + item.username + ' ' + item.roomname + '</p>'
-                              + '<p>' + item.text + '</p>'
-                            +'</li>';
-
+                  liHtml = '<li class="chat">' +
+                              '<p class="userName">' + item.username + ' ' + item.roomname + '</p>' +
+                              '<p>' + item.text + '</p>' +
+                            '</li>';
                   //_vm.chats.children('li').remove();
-                  _vm.chats.append(chatHtml);
+                  _vm.chats.append(liHtml);
                 });
 
               },
