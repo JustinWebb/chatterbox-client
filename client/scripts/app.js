@@ -6,21 +6,25 @@
         messages: null,
         currentRoom: null,
         rooms: null,
-        submit: null
+        submit: null,
+        listLimit: 10,
+        chatRooms: {},
+        results:{}
       };
       // Public API
       return {
-          results:[],
 
           server: 'https://api.parse.com/1/classes/chatterbox',
 
           init:function(){
             _vm.chats = $('#chats');
-            _vm.chats.on('click', '.username', this.addFriend);
             _vm.rooms = $('#roomSelect');
             _vm.submit = $('#send .submit');
+
+            _vm.chats.on('click', '.username', this.addFriend);
             _vm.submit.on('submit', this.handleSubmit);
-            // $('ul .chat .username').on('click', this.addFriend);
+
+            this.fetch();
           },
 
           addFriend: function(e){
@@ -80,7 +84,8 @@
               data: /*{'order=-createdAt', 'limit=10'}*/
               {
                  order:'-createdAt',
-                 limit: 10
+                 limit: _vm.listLimit
+                 // where:{roomname!=}
                  // count: 1
                  // include: "something"
               },
@@ -89,16 +94,29 @@
               success: function (data) {
                 //console.error('chatterbox: Failed to send message');
                 // ourData
+                _vm.results
+                data.results
 
-                _.each(data.results, function(item){
-                  _vm.messages.children('li').remove();
-                  _vm.messages.append('<li class="chat">' +
-                                          '<p class="userName">' + item.username + ' ' + item.roomname + '</p>'
-                                          + '<p>' + item.text + '</p>'
+                var chatHtml = "";
+                _.each(data.results, function(item, i, list){
+                  if (!_vm.chatRooms[item.roomname]) {
+                    var key = item.objectId;
+                    _vm.chatRooms[item.roomname] = {key : item};
+                  }
+                  else if (!_vm.chatRooms[item.roomname][item.objectId]) {
+                      _vm.chatRooms[item.roomname][item.objectId] = item;
+                      console.log(_vm.chatRooms, i);
+                  }
 
+                  chatHtml = '<li class="chat">' +
+                              '<p class="userName">' + item.username + ' ' + item.roomname + '</p>'
+                              + '<p>' + item.text + '</p>'
+                            +'</li>';
 
-                                        +'</li>');
+                  //_vm.chats.children('li').remove();
+                  _vm.chats.append(chatHtml);
                 });
+
               },
               error: function (data) {
                 console.error('chatterbox: Failed to send message');
@@ -108,34 +126,12 @@
 
         };
     })();
+
     // on load
-    // $(function(){
-    //   $('#submitMessage').click(function(e){
+    $(document).ready(function(){
 
-    //     e.preventDefault();
-    //     var message = {
-    //       'username': 'jyeg',
-    //       'text': $('#messageText').val(),
-    //       'roomname': 'kings_landing'
-    //     };
+      app.init();
 
-    //     $.ajax({
-    //       // always use this url
-    //       url: 'https://api.parse.com/1/classes/chatterbox',
-    //       type: 'POST',
-    //       data: JSON.stringify(message),
-    //       contentType: 'application/json',
-    //       success: function (data) {
-    //         console.log('chatterbox: Message sent' + message);
-    //       },
-    //       error: function (data) {
-    //         // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
-    //         console.error('chatterbox: Failed to send message');
-    //       }
-    //     });
-    //   });
-
-    //   //setInterval(refresh, 1000);
-    // });
+    });
 
 
