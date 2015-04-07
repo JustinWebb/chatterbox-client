@@ -3,7 +3,8 @@
       // Private variables
       var _vm = {
         chats: null,
-        messages: null
+        messages: null,
+        currentRoom: null
       };
       // Public API
       return {
@@ -13,7 +14,13 @@
 
           init:function(){
             _vm.chats = $('#chats');
+            _vm.chats.on('click', '.username', this.addFriend);
             _vm.rooms = $('#roomSelect');
+            // $('ul .chat .username').on('click', this.addFriend);
+          },
+
+          addFriend: function(e){
+            console.log(e);
           },
 
           clearMessages:function(){
@@ -23,7 +30,7 @@
           addMessage : function (msg) {
             var item =  '<li class="chat">' +
                           '<p>'+
-                            '<span class="userName">' + msg.username + '</span>' +
+                            '<span class="username">' + msg.username + '</span>' +
                             '<span>' + msg.roomname + '</span>' +
                             '<span>' + msg.text + '</span>' +
                           '</p>' +
@@ -31,10 +38,10 @@
               _vm.chats.append(item);
           },
           addRoom : function (msg) {
-            var item =  '<li class="chat">' +
-                          '<p>'+
-                            '<span class="userName">' + msg + '</span>' +
-                          '</p>' +
+            var item =  '<li>' +
+                          // '<a>'+
+                             msg +
+                          // '</p>' +
                         '</li>';
               _vm.rooms.append(item);
           },
