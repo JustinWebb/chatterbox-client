@@ -2,11 +2,12 @@
     var app = (function(){
       // Private variables
       var _vm = {
-        chats: null,
-        messages: null,
-        currentRoom: null,
-        rooms: null,
-        submit: null,
+        $chats: null,
+        //$messages: null,
+        $rooms: null,
+        $submit: null,
+        currentUser: null,
+        currentRoom: "homeroom",
         listLimit: 10,
         chatRooms: {},
         results:{}
@@ -17,12 +18,16 @@
           server: 'https://api.parse.com/1/classes/chatterbox',
 
           init:function(){
-            _vm.chats = $('#chats');
-            _vm.rooms = $('#roomSelect');
-            _vm.submit = $('#send .submit');
+            _vm.$chats = $('#chats');
+            _vm.$rooms = $('#roomSelect');
+            _vm.$form = $('#send');
+            _vm.$input = $('#message');
 
-            _vm.chats.on('click', '.username', this.addFriend);
-            _vm.submit.on('submit', this.handleSubmit);
+            _vm.$chats.on('click', '.username', this.addFriend);
+            _vm.$form.on('submit', this.handleSubmit.bind(this));
+
+            _vm.currentUser = (prompt('What is your name?') || 'anonymous');
+            //window.location.search += '&username=' + _vm.currentUser;
 
             this.fetch();
           },
@@ -32,7 +37,7 @@
           },
 
           clearMessages:function(){
-            _vm.chats.children().remove();
+            _vm.$chats.children().remove();
           },
 
           addMessage : function (msg) {
@@ -43,7 +48,7 @@
                             '<span>' + msg.text + '</span>' +
                           '</p>' +
                         '</li>';
-              _vm.chats.append(item);
+              _vm.$chats.append(item);
           },
           addRoom : function (msg) {
             var item =  '<li>' +
@@ -51,11 +56,19 @@
                              msg +
                           // '</p>' +
                         '</li>';
-              _vm.rooms.append(item);
+              _vm.$rooms.append(item);
           },
 
           handleSubmit: function(e){
+            e.preventDefault();
             console.log(e);
+            var input = _.escape(_vm.$input.val());
+            var message = {
+              'username': window.location.search.split("=")[2],
+              'text': input,
+              'roomname': _vm.currentRoom
+            };
+            this.send(message);
           },
 
           send:function(input){
@@ -95,6 +108,7 @@
                 //console.error('chatterbox: Failed to send message')
                 var liHtml = "";
                 _.each(data.results, function(item, i, list){
+                  item.text = _.escape(item.text);
                   if (!_vm.chatRooms[item.roomname]) {
                     var key = item.objectId;
                     _vm.chatRooms[item.roomname] = {key : item};
@@ -108,10 +122,11 @@
                               '<p class="userName">' + item.username + ' ' + item.roomname + '</p>' +
                               '<p>' + item.text + '</p>' +
                             '</li>';
-                  //_vm.chats.children('li').remove();
-                  _vm.chats.append(liHtml);
+                  //_vm.$chats.children('li').remove();
+                  _vm.$chats.append(liHtml);
                 });
-
+                // populate the list of rooms available
+                // use add room function.
               },
               error: function (data) {
                 console.error('chatterbox: Failed to send message');
